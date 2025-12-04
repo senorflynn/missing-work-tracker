@@ -1,0 +1,2781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Missing Work Tracker</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📋</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+/* Reset and Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --primary-color: #a78bfa;
+    --primary-dark: #9333ea;
+    --primary-glow: rgba(167, 139, 250, 0.2);
+    --secondary-color: #6c757d;
+    --success-color: #10b981;
+    --danger-color: #ef4444;
+    --warning-color: #f59e0b;
+    --background: #f5f7fa;
+    --surface: #ffffff;
+    --text-primary: #2c3e50;
+    --text-secondary: #6c757d;
+    --border-color: #dee2e6;
+    --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.15);
+
+    /* Period accent colors */
+    --period-1: #a78bfa;
+    --period-2: #c084fc;
+    --period-3: #fb923c;
+    --period-4: #f472b6;
+    --period-5: #4ade80;
+    --period-6: #fbbf24;
+}
+
+/* Dark Mode - Ganify Inspired */
+body.dark-mode {
+    --background: #0F1419;
+    --surface: #1a1f26;
+    --surface-elevated: #242b33;
+    --text-primary: #ffffff;
+    --text-secondary: #94a3b8;
+    --border-color: #2d3748;
+    --shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.6);
+}
+
+body {
+    font-family: 'Inter Tight', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: var(--background);
+    color: var(--text-primary);
+    line-height: 1.6;
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.app-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Header */
+.app-header {
+    background: var(--surface);
+    color: var(--text-primary);
+    padding: 32px 24px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-bottom: 1px solid var(--border-color);
+    position: relative;
+}
+
+.app-header h1 {
+    font-size: 64px;
+    font-weight: 800;
+    letter-spacing: -2px;
+}
+
+.app-header .icon-btn {
+    position: absolute;
+    right: 24px;
+}
+
+.icon-btn {
+    background: var(--surface-elevated, var(--surface));
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    font-size: 20px;
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.icon-btn:hover {
+    background: var(--border-color);
+}
+
+.icon-btn:active {
+    transform: scale(0.95);
+}
+
+/* Simplified Controls Bar */
+.controls-bar {
+    background: var(--surface);
+    padding: 16px 24px;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+}
+
+.view-toggle-group {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.toggle-label {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 52px;
+    height: 28px;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider-small {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--border-color);
+    transition: 0.3s;
+    border-radius: 28px;
+}
+
+.toggle-slider-small:before {
+    position: absolute;
+    content: "";
+    height: 22px;
+    width: 22px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: 0.3s;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+input:checked + .toggle-slider-small {
+    background: var(--primary-color);
+}
+
+input:checked + .toggle-slider-small:before {
+    transform: translateX(24px);
+}
+
+.action-buttons {
+    display: flex;
+    gap: 12px;
+}
+
+/* Tab Navigation */
+.tab-nav {
+    background: var(--surface);
+    display: flex;
+    overflow-x: auto;
+    border-bottom: 2px solid var(--border-color);
+    box-shadow: var(--shadow);
+    -webkit-overflow-scrolling: touch;
+}
+
+.tab-nav::-webkit-scrollbar {
+    display: none;
+}
+
+.tab-btn {
+    flex: 0 0 auto;
+    padding: 16px 24px;
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    color: var(--text-secondary);
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.tab-btn.active {
+    color: var(--primary-color);
+    border-bottom-color: var(--primary-color);
+}
+
+.tab-btn:active {
+    background: var(--background);
+}
+
+/* Main Content */
+.main-content {
+    flex: 1;
+    padding: 20px;
+}
+
+/* Welcome Screen */
+.welcome-screen {
+    text-align: center;
+    padding: 80px 20px;
+}
+
+.welcome-screen h2 {
+    font-size: 32px;
+    margin-bottom: 16px;
+    color: var(--text-primary);
+    font-weight: 800;
+    letter-spacing: -1px;
+}
+
+.welcome-screen p {
+    font-size: 17px;
+    color: var(--text-secondary);
+    margin-bottom: 32px;
+    font-weight: 500;
+}
+
+/* Assignment View */
+.assignment-view {
+    animation: fadeIn 0.3s ease-in;
+}
+
+.assignment-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.assignment-header h2 {
+    font-size: 24px;
+    color: var(--text-primary);
+    margin: 0;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+}
+
+.assignment-title-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.assignment-select {
+    flex: 1;
+    max-width: 400px;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.assignment-content {
+    display: grid;
+    gap: 24px;
+    grid-template-columns: repeat(auto-fill, minmax(500px, 1fr));
+}
+
+.period-section {
+    background: var(--surface);
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: var(--shadow);
+    border-left: 4px solid var(--primary-color);
+    transition: all 0.2s;
+}
+
+.period-section:hover {
+    box-shadow: var(--shadow-lg);
+}
+
+.period-section-header {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border-color);
+    letter-spacing: -0.3px;
+}
+
+/* Color-coded period sections */
+.period-section[data-period="0"] { border-left-color: var(--period-1); }
+.period-section[data-period="1"] { border-left-color: var(--period-2); }
+.period-section[data-period="2"] { border-left-color: var(--period-3); }
+.period-section[data-period="3"] { border-left-color: var(--period-4); }
+.period-section[data-period="4"] { border-left-color: var(--period-5); }
+.period-section[data-period="5"] { border-left-color: var(--period-6); }
+
+.period-students {
+    display: grid;
+    gap: 12px;
+}
+
+.student-item {
+    background: var(--background);
+    padding: 16px 20px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+}
+
+.student-item:hover {
+    border-color: var(--border-color);
+    background: var(--surface-elevated, var(--surface));
+}
+
+.student-item.completed {
+    opacity: 0.5;
+    text-decoration: line-through;
+}
+
+.student-name {
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+}
+
+.student-actions {
+    display: flex;
+    gap: 8px;
+}
+
+/* Period View */
+.period-view {
+    animation: fadeIn 0.3s ease-in;
+}
+
+.period-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.period-header h2 {
+    font-size: 24px;
+    color: var(--text-primary);
+    font-weight: 800;
+    letter-spacing: -0.5px;
+}
+
+.period-title-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.period-select {
+    flex: 1;
+    max-width: 400px;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+/* Filter Bar */
+.filter-bar {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.filter-bar .form-select {
+    width: auto;
+    min-width: 180px;
+    flex: 0 0 auto;
+}
+
+/* Missing Work List */
+.missing-work-list {
+    display: grid;
+    gap: 16px;
+    grid-template-columns: repeat(auto-fill, minmax(500px, 1fr));
+}
+
+.missing-work-item {
+    background: var(--surface);
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: var(--shadow);
+    border-left: 4px solid var(--warning-color);
+    animation: slideIn 0.3s ease-out;
+    transition: all 0.2s;
+}
+
+.missing-work-item:hover {
+    box-shadow: var(--shadow-lg);
+}
+
+.missing-work-item.resolved {
+    border-left-color: var(--success-color);
+    opacity: 0.6;
+}
+
+/* Assignments List (grouped under student) */
+.assignments-list {
+    margin-top: 16px;
+    display: grid;
+    gap: 12px;
+}
+
+.assignment-entry {
+    background: var(--background);
+    padding: 16px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    gap: 16px;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+}
+
+.assignment-entry:hover {
+    border-color: var(--border-color);
+    background: var(--surface-elevated, var(--surface));
+}
+
+.assignment-entry.resolved {
+    opacity: 0.5;
+}
+
+.assignment-entry.resolved .item-assignment {
+    text-decoration: line-through;
+}
+
+.assignment-info {
+    flex: 1;
+}
+
+.assignment-actions {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.assignment-notes {
+    margin-top: 8px;
+    padding: 8px 12px;
+    background: var(--surface);
+    border-radius: 6px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    border-left: 2px solid var(--primary-color);
+}
+
+.item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 12px;
+}
+
+.item-student {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -0.3px;
+}
+
+.item-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.item-assignment {
+    font-size: 15px;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+    font-weight: 500;
+}
+
+.item-details {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    font-size: 13px;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.item-detail {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.item-notes {
+    margin-top: 12px;
+    padding: 12px;
+    background: var(--background);
+    border-radius: 8px;
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    font-size: 20px;
+    color: var(--text-secondary);
+}
+
+/* Buttons */
+.btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    min-height: 48px;
+    touch-action: manipulation;
+    letter-spacing: -0.3px;
+}
+
+.btn-primary {
+    background: var(--primary-color);
+    color: #0F1419;
+    box-shadow: 0 4px 12px var(--primary-glow);
+}
+
+.btn-primary:hover {
+    background: var(--primary-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px var(--primary-glow);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+}
+
+.btn-secondary {
+    background: var(--surface-elevated, var(--border-color));
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+}
+
+.btn-secondary:hover {
+    background: var(--border-color);
+}
+
+.btn-secondary:active {
+    transform: scale(0.98);
+}
+
+.btn-success {
+    background: var(--success-color);
+    color: white;
+    padding: 8px 16px;
+    font-size: 14px;
+    min-height: 40px;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
+}
+
+.btn-success:hover {
+    background: #059669;
+    transform: translateY(-1px);
+}
+
+.btn-danger {
+    background: var(--danger-color);
+    color: white;
+    padding: 8px 16px;
+    font-size: 14px;
+    min-height: 40px;
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2);
+}
+
+.btn-danger:hover {
+    background: #dc2626;
+    transform: translateY(-1px);
+}
+
+.btn-large {
+    padding: 16px 32px;
+    font-size: 17px;
+    min-height: 56px;
+}
+
+.btn-small {
+    padding: 8px 16px;
+    font-size: 14px;
+    min-height: 40px;
+}
+
+/* Form Elements */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.form-input,
+.form-select,
+.form-textarea {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 16px;
+    font-family: inherit;
+    transition: border-color 0.2s;
+    min-height: 48px;
+    background: var(--surface);
+    color: var(--text-primary);
+}
+
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.form-textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.form-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+    flex-wrap: wrap;
+}
+
+/* Modal */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+    animation: fadeIn 0.2s ease-in;
+}
+
+.modal-content {
+    background: var(--surface);
+    border-radius: 16px;
+    max-width: 600px;
+    width: 100%;
+    max-height: 90vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: var(--shadow-lg);
+    animation: slideUp 0.3s ease-out;
+    border: 1px solid var(--border-color);
+}
+
+.modal-header {
+    padding: 24px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h2 {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 28px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background 0.2s;
+}
+
+.close-btn:active {
+    background: var(--background);
+}
+
+.modal-body {
+    padding: 20px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+/* Class Manager */
+.class-manager {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+    align-items: center;
+}
+
+.class-manager .form-select {
+    flex: 1;
+}
+
+.class-manager-actions {
+    display: flex;
+    gap: 8px;
+}
+
+/* Settings Items */
+.setting-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    background: var(--background);
+    border-radius: 8px;
+    margin-bottom: 12px;
+}
+
+.setting-info {
+    flex: 1;
+}
+
+/* Toggle Switch */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider-switch {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--border-color);
+    transition: 0.3s;
+    border-radius: 34px;
+}
+
+.slider-switch:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: 0.3s;
+    border-radius: 50%;
+}
+
+input:checked + .slider-switch {
+    background-color: var(--primary-color);
+}
+
+input:checked + .slider-switch:before {
+    transform: translateX(26px);
+}
+
+/* Import Preview List */
+.import-preview-list {
+    max-height: 400px;
+    overflow-y: auto;
+    margin-bottom: 20px;
+}
+
+.import-preview-item {
+    background: var(--background);
+    padding: 16px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    border: 1px solid var(--border-color);
+}
+
+.import-preview-item label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.import-preview-item .student-count {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-left: 8px;
+    font-weight: 400;
+}
+
+.import-preview-item input {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 16px;
+    font-family: inherit;
+    background: var(--surface);
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.import-preview-item input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+/* Custom Dropdown (Assignment Modal) */
+.custom-dropdown {
+    position: relative;
+    width: 100%;
+}
+
+.dropdown-button {
+    width: 100%;
+    padding: 12px 16px;
+    background: var(--surface);
+    color: var(--text-primary);
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 16px;
+    font-family: inherit;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    text-align: left;
+    transition: border-color 0.2s;
+}
+
+.dropdown-button:hover {
+    border-color: var(--primary-color);
+}
+
+.dropdown-button:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.dropdown-arrow {
+    font-size: 12px;
+    color: var(--text-secondary);
+    transition: transform 0.2s;
+}
+
+.custom-dropdown.open .dropdown-arrow {
+    transform: rotate(180deg);
+}
+
+.dropdown-panel {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    background: var(--surface);
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: var(--shadow-lg);
+    max-height: 300px;
+    overflow-y: auto;
+    z-index: 1000;
+}
+
+.dropdown-checkbox-list {
+    padding: 8px;
+}
+
+.dropdown-checkbox-item {
+    display: flex;
+    align-items: center;
+    padding: 10px 12px;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: background 0.2s;
+}
+
+.dropdown-checkbox-item:hover {
+    background: var(--background);
+}
+
+.dropdown-checkbox-item input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    margin-right: 12px;
+    cursor: pointer;
+}
+
+.dropdown-checkbox-item label {
+    cursor: pointer;
+    font-size: 15px;
+    margin: 0;
+    flex: 1;
+    font-weight: 500;
+}
+
+/* Student Checkboxes (Assignment Modal) */
+.student-checkboxes {
+    max-height: 400px;
+    overflow-y: auto;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    padding: 16px;
+    background: var(--background);
+}
+
+.checkbox-period-group {
+    margin-bottom: 20px;
+}
+
+.checkbox-period-group:last-child {
+    margin-bottom: 0;
+}
+
+.checkbox-period-label {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: 12px;
+    display: block;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.checkbox-item {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    margin-bottom: 8px;
+    background: var(--surface);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.checkbox-item:hover {
+    background: rgba(74, 144, 226, 0.1);
+}
+
+.checkbox-item input[type="checkbox"] {
+    width: 24px;
+    height: 24px;
+    margin-right: 12px;
+    cursor: pointer;
+}
+
+.checkbox-item label {
+    flex: 1;
+    cursor: pointer;
+    font-size: 16px;
+    margin: 0;
+}
+
+/* Utility Classes */
+.hidden {
+    display: none !important;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .app-header h1 {
+        font-size: 20px;
+    }
+
+    .controls-bar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 16px;
+    }
+
+    .view-toggle-group {
+        justify-content: center;
+    }
+
+    .action-buttons {
+        width: 100%;
+    }
+
+    .action-buttons .btn {
+        flex: 1;
+    }
+
+    .period-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .form-actions .btn {
+        width: 100%;
+    }
+
+    /* Single column on smaller screens */
+    .missing-work-list,
+    .assignment-content {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* iPad Specific Optimizations */
+@media (min-width: 768px) and (max-width: 1024px) {
+    .missing-work-list {
+        grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    }
+}
+
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <h1>Missing Work Tracker</h1>
+            <button id="settingsBtn" class="icon-btn" title="Settings">⚙️</button>
+        </header>
+
+        <!-- Simplified Controls Bar -->
+        <div class="controls-bar">
+            <div class="view-toggle-group">
+                <span class="toggle-label">By Assignment</span>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="viewToggle">
+                    <span class="toggle-slider-small"></span>
+                </label>
+                <span class="toggle-label">By Period</span>
+            </div>
+            <div class="action-buttons">
+                <button id="addAssignmentBtn" class="btn btn-primary">
+                    ➕ New Assignment
+                </button>
+                <button id="addMissingWorkBtn" class="btn btn-primary hidden">
+                    ➕ Add Missing Work
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Navigation -->
+        <nav class="tab-nav" id="tabNav">
+            <!-- Tabs will be dynamically generated based on current view -->
+        </nav>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Welcome/Setup Screen (shown when no classes exist) -->
+            <div id="welcomeScreen" class="welcome-screen">
+                <h2>Welcome to Missing Work Tracker!</h2>
+                <p>Get started by adding your first class period.</p>
+                <button id="addFirstClassBtn" class="btn btn-primary btn-large">
+                    ➕ Add Your First Class
+                </button>
+            </div>
+
+            <!-- Assignment View (shown when viewing by assignment) -->
+            <div id="assignmentView" class="assignment-view">
+                <div class="assignment-header">
+                    <div class="assignment-title-row">
+                        <h2>Assignment</h2>
+                        <select id="assignmentSelect" class="form-select assignment-select">
+                            <option value="">Select an assignment...</option>
+                        </select>
+                        <button id="editAssignmentBtn" class="btn btn-secondary btn-small">
+                            ✏️ Edit
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Assignment Content (grouped by period) -->
+                <div id="assignmentContent" class="assignment-content">
+                    <!-- Assignment details grouped by period will be dynamically generated -->
+                </div>
+
+                <!-- Empty State -->
+                <div id="assignmentEmptyState" class="empty-state hidden">
+                    <p>No students are missing this assignment</p>
+                </div>
+            </div>
+
+            <!-- Period View (shown when viewing a specific period) -->
+            <div id="periodView" class="period-view hidden">
+                <div class="period-header">
+                    <div class="period-title-row">
+                        <h2>Class Period</h2>
+                        <select id="periodSelect" class="form-select period-select">
+                            <option value="">Select a period...</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Filter/Sort Options -->
+                <div class="filter-bar">
+                    <select id="filterStudent" class="form-select">
+                        <option value="all">All Students</option>
+                    </select>
+                    <select id="sortBy" class="form-select">
+                        <option value="" disabled selected>Sort by</option>
+                        <option value="dateAdded">Date Added</option>
+                        <option value="dueDate">Due Date</option>
+                        <option value="firstName">First Name</option>
+                        <option value="lastName">Last Name</option>
+                    </select>
+                </div>
+
+                <!-- Missing Work List -->
+                <div id="missingWorkList" class="missing-work-list">
+                    <!-- Missing work items will be dynamically generated -->
+                </div>
+
+                <!-- Empty State -->
+                <div id="emptyState" class="empty-state hidden">
+                    <p>🎉 No missing work for this class!</p>
+                </div>
+            </div>
+        </main>
+
+        <!-- Settings Modal -->
+        <div id="settingsModal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Settings</h2>
+                    <button class="close-btn" onclick="closeModal('settingsModal')">✕</button>
+                </div>
+                <div class="modal-body">
+                    <h3>Manage Classes</h3>
+                    <div class="class-manager">
+                        <select id="classManageSelect" class="form-select">
+                            <option value="">Select a class...</option>
+                        </select>
+                        <div class="class-manager-actions">
+                            <button id="editClassBtn" class="btn btn-secondary" disabled>✏️ Edit</button>
+                            <button id="deleteClassBtn" class="btn btn-danger" disabled>🗑️ Delete</button>
+                        </div>
+                    </div>
+                    <button id="addClassBtn" class="btn btn-secondary">➕ Add New Class</button>
+                    <hr style="margin: 24px 0; border: none; border-top: 1px solid var(--border-color);">
+                    <h3>Appearance</h3>
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <strong>Dark Mode</strong>
+                            <p style="color: var(--text-secondary); font-size: 14px; margin: 4px 0 0 0;">Reduce eye strain with a dark color scheme</p>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="darkModeToggle">
+                            <span class="slider-switch"></span>
+                        </label>
+                    </div>
+                    <hr style="margin: 24px 0; border: none; border-top: 1px solid var(--border-color);">
+                    <h3>Google Drive Sync</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 12px;">Sync your data across all devices using Google Drive</p>
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <strong id="syncStatus">💾 Saved locally only</strong>
+                            <p style="color: var(--text-secondary); font-size: 14px; margin: 4px 0 0 0;">Sign in to save your data to Google Drive</p>
+                        </div>
+                        <div style="display: flex; gap: 8px;">
+                            <button id="googleSignInBtn" class="btn btn-primary">Sign in with Google</button>
+                            <button id="googleSignOutBtn" class="btn btn-secondary hidden">Sign Out</button>
+                        </div>
+                    </div>
+                    <hr style="margin: 24px 0; border: none; border-top: 1px solid var(--border-color);">
+                    <h3>Import Roster</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 12px;">Import classes and students from PowerSchool CSV export</p>
+                    <input type="file" id="rosterFileInput" accept=".csv" style="display: none;">
+                    <button id="importRosterBtn" class="btn btn-primary">📂 Import from PowerSchool</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add/Edit Class Modal -->
+        <div id="classModal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 id="classModalTitle">Add New Class</h2>
+                    <button class="close-btn" onclick="closeModal('classModal')">✕</button>
+                </div>
+                <div class="modal-body">
+                    <form id="classForm">
+                        <div class="form-group">
+                            <label for="className">Class Name:</label>
+                            <input type="text" id="className" class="form-input" placeholder="e.g., Spanish 3 - Period 1" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="studentNames">Student Names (one per line):</label>
+                            <textarea id="studentNames" class="form-textarea" rows="10" placeholder="Enter student names, one per line"></textarea>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">Save Class</button>
+                            <button type="button" class="btn btn-secondary" onclick="closeModal('classModal')">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Missing Work Modal (Individual Entry) -->
+        <div id="missingWorkModal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Add Missing Work</h2>
+                    <button class="close-btn" onclick="closeModal('missingWorkModal')">✕</button>
+                </div>
+                <div class="modal-body">
+                    <form id="missingWorkForm">
+                        <div class="form-group">
+                            <label for="studentSelect">Student:</label>
+                            <select id="studentSelect" class="form-select" required>
+                                <option value="">Select a student...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="assignmentName">Assignment/Test Name:</label>
+                            <input type="text" id="assignmentName" class="form-input" placeholder="e.g., Chapter 5 Quiz" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="dueDate">Original Due Date:</label>
+                            <input type="date" id="dueDate" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label for="notes">Notes (optional):</label>
+                            <textarea id="notes" class="form-textarea" rows="3" placeholder="Any additional information..."></textarea>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">Add Missing Work</button>
+                            <button type="button" class="btn btn-secondary" onclick="closeModal('missingWorkModal')">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Import Preview Modal -->
+        <div id="importPreviewModal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Review & Edit Class Names</h2>
+                    <button class="close-btn" onclick="closeModal('importPreviewModal')">✕</button>
+                </div>
+                <div class="modal-body">
+                    <p style="color: var(--text-secondary); margin-bottom: 16px;">Review and edit class names before importing. Click Import when ready.</p>
+                    <div id="importPreviewList" class="import-preview-list">
+                        <!-- Preview items will be dynamically generated -->
+                    </div>
+                    <div class="form-actions">
+                        <button id="confirmImportBtn" class="btn btn-primary">Import Classes</button>
+                        <button type="button" class="btn btn-secondary" onclick="closeModal('importPreviewModal')">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Assignment Modal (Bulk Entry) -->
+        <div id="assignmentModal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>New Assignment</h2>
+                    <button class="close-btn" onclick="closeModal('assignmentModal')">✕</button>
+                </div>
+                <div class="modal-body">
+                    <form id="assignmentForm">
+                        <div class="form-group">
+                            <label for="newAssignmentName">Assignment/Test Name:</label>
+                            <input type="text" id="newAssignmentName" class="form-input" placeholder="e.g., Chapter 5 Quiz" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Which classes does this assignment apply to?</label>
+                            <div class="custom-dropdown" id="classDropdown">
+                                <button type="button" class="dropdown-button" id="classDropdownBtn">
+                                    <span id="classDropdownText">Select classes...</span>
+                                    <span class="dropdown-arrow">▼</span>
+                                </button>
+                                <div class="dropdown-panel hidden" id="classDropdownPanel">
+                                    <div id="classCheckboxList" class="dropdown-checkbox-list">
+                                        <!-- Class checkboxes will be dynamically generated -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="newDueDate">Original Due Date:</label>
+                            <input type="date" id="newDueDate" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label for="newNotes">Notes (optional):</label>
+                            <textarea id="newNotes" class="form-textarea" rows="2" placeholder="Any additional information..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Select students who are missing this assignment:</label>
+                            <div id="studentCheckboxes" class="student-checkboxes">
+                                <!-- Student checkboxes grouped by class will be dynamically generated -->
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">Create Assignment</button>
+                            <button type="button" class="btn btn-secondary" onclick="closeModal('assignmentModal')">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+// Missing Work Tracker App
+// Data Model and State Management
+
+class MissingWorkTracker {
+    constructor() {
+        this.classes = [];
+        this.missingWork = [];
+        this.currentView = 'assignment'; // 'assignment' or 'period'
+        this.currentClassId = null;
+        this.currentAssignmentName = null;
+        this.editingClassId = null;
+        this.darkMode = true;
+        this.loadData();
+        this.init();
+    }
+
+    // Data Persistence
+    loadData() {
+        const savedClasses = localStorage.getItem('classes');
+        const savedWork = localStorage.getItem('missingWork');
+        const savedView = localStorage.getItem('currentView');
+        const savedDarkMode = localStorage.getItem('darkMode');
+
+        if (savedClasses) {
+            this.classes = JSON.parse(savedClasses);
+        }
+        if (savedWork) {
+            this.missingWork = JSON.parse(savedWork);
+        }
+        if (savedView) {
+            this.currentView = savedView;
+        }
+        if (savedDarkMode) {
+            this.darkMode = JSON.parse(savedDarkMode);
+            this.applyDarkMode();
+        }
+
+    }
+
+    importRosterFromCSV(file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const csvText = e.target.result;
+                const importedClasses = this.parseRosterCSV(csvText);
+
+                if (importedClasses.length === 0) {
+                    alert('No classes found in the CSV file.');
+                    return;
+                }
+
+                // Store temporarily for preview
+                this.pendingImport = importedClasses;
+
+                // Show preview modal
+                this.showImportPreview();
+
+            } catch (error) {
+                alert('Error reading CSV file. Please make sure it\'s a valid PowerSchool roster export.');
+                console.error(error);
+            }
+
+            // Reset file input
+            document.getElementById('rosterFileInput').value = '';
+        };
+
+        reader.readAsText(file);
+    }
+
+    showImportPreview() {
+        const previewList = document.getElementById('importPreviewList');
+
+        previewList.innerHTML = this.pendingImport.map((cls, index) => `
+            <div class="import-preview-item">
+                <label>
+                    Class Name
+                    <span class="student-count">(${cls.students.length} students)</span>
+                </label>
+                <input type="text"
+                       class="import-class-name"
+                       data-index="${index}"
+                       value="${cls.name}">
+            </div>
+        `).join('');
+
+        closeModal('settingsModal');
+        document.getElementById('importPreviewModal').classList.remove('hidden');
+    }
+
+    confirmImport() {
+        // Get updated class names from inputs
+        const inputs = document.querySelectorAll('.import-class-name');
+        inputs.forEach(input => {
+            const index = parseInt(input.dataset.index);
+            this.pendingImport[index].name = input.value.trim();
+        });
+
+        // Import classes
+        this.pendingImport.forEach(cls => {
+            const newClass = {
+                id: Date.now().toString() + Math.random(),
+                name: cls.name,
+                students: cls.students
+            };
+            this.classes.push(newClass);
+        });
+
+        this.saveData();
+        closeModal('importPreviewModal');
+        this.render();
+        alert(`Successfully imported ${this.pendingImport.length} classes!`);
+
+        this.pendingImport = null;
+    }
+
+    parseRosterCSV(csvText) {
+        const lines = csvText.split('\n').map(line => line.trim()).filter(line => line);
+        const classes = {};
+
+        // Skip header row
+        for (let i = 1; i < lines.length; i++) {
+            const line = lines[i];
+
+            // Parse CSV line (handle quoted fields)
+            const matches = line.match(/(".*?"|[^,]+)(?=\s*,|\s*$)/g);
+            if (!matches || matches.length < 2) continue;
+
+            const name = matches[0].replace(/^"|"$/g, '').trim();
+            const course = matches[1].replace(/^"|"$/g, '').trim();
+
+            if (!name || !course) continue;
+
+            // Convert "Last, First" to "First Last"
+            const nameParts = name.split(',').map(p => p.trim());
+            const firstName = nameParts.length > 1 ? nameParts[1] : '';
+            const lastName = nameParts[0];
+            const fullName = firstName ? `${firstName} ${lastName}` : lastName;
+
+            // Format course name: "1(A) SPANISH 3" → "Period 1 - Spanish 3"
+            const formattedCourseName = this.formatCourseName(course);
+
+            // Group by course
+            if (!classes[formattedCourseName]) {
+                classes[formattedCourseName] = {
+                    name: formattedCourseName,
+                    students: []
+                };
+            }
+            classes[formattedCourseName].students.push(fullName);
+        }
+
+        return Object.values(classes);
+    }
+
+    formatCourseName(rawName) {
+        // Extract period number and course name from format like "1(A) SPANISH 3"
+        const match = rawName.match(/^(\d+)\([A-Z]\)\s*(.+)$/);
+
+        if (match) {
+            const period = match[1];
+            const courseName = match[2].trim();
+
+            // Convert to title case
+            const titleCased = courseName.toLowerCase().replace(/\b\w/g, char => char.toUpperCase());
+
+            return `Period ${period} - ${titleCased}`;
+        }
+
+        // If format doesn't match, return as-is
+        return rawName;
+    }
+
+    saveData() {
+        // Save to localStorage
+        localStorage.setItem('classes', JSON.stringify(this.classes));
+        localStorage.setItem('missingWork', JSON.stringify(this.missingWork));
+        localStorage.setItem('currentView', this.currentView);
+        localStorage.setItem('darkMode', JSON.stringify(this.darkMode));
+
+        // Also save to Google Drive if signed in
+        if (driveSync && driveSync.isSignedIn) {
+            const data = {
+                classes: this.classes,
+                missingWork: this.missingWork,
+                currentView: this.currentView,
+                darkMode: this.darkMode,
+                lastModified: new Date().toISOString()
+            };
+            driveSync.saveToDrive(data).catch(error => {
+                console.error('Failed to sync to Drive:', error);
+            });
+        }
+    }
+
+    applyDarkMode() {
+        if (this.darkMode) {
+            document.body.classList.add('dark-mode');
+        } else {
+            document.body.classList.remove('dark-mode');
+        }
+    }
+
+    toggleDarkMode() {
+        this.darkMode = !this.darkMode;
+        this.applyDarkMode();
+        this.saveData();
+    }
+
+    // Class Management
+    addClass(name, students) {
+        const newClass = {
+            id: Date.now().toString(),
+            name: name,
+            students: students.filter(s => s.trim() !== '').map(s => s.trim())
+        };
+        this.classes.push(newClass);
+        this.saveData();
+        return newClass;
+    }
+
+    updateClass(id, name, students) {
+        const classIndex = this.classes.findIndex(c => c.id === id);
+        if (classIndex !== -1) {
+            this.classes[classIndex].name = name;
+            this.classes[classIndex].students = students.filter(s => s.trim() !== '').map(s => s.trim());
+            this.saveData();
+            return true;
+        }
+        return false;
+    }
+
+    deleteClass(id) {
+        this.classes = this.classes.filter(c => c.id !== id);
+        this.missingWork = this.missingWork.filter(w => w.classId !== id);
+        this.saveData();
+    }
+
+    getClass(id) {
+        return this.classes.find(c => c.id === id);
+    }
+
+    // Extract period number from class name
+    extractPeriodNumber(className) {
+        // Match "Period X" or "Period X -" or "- Period X"
+        const match = className.match(/Period\s+(\d+)/i);
+        return match ? parseInt(match[1]) : 999; // Put classes without period numbers at the end
+    }
+
+    // Get classes sorted by period number
+    getSortedClasses() {
+        return [...this.classes].sort((a, b) => {
+            const periodA = this.extractPeriodNumber(a.name);
+            const periodB = this.extractPeriodNumber(b.name);
+            return periodA - periodB;
+        });
+    }
+
+    // Missing Work Management
+    addMissingWork(classId, studentName, assignmentName, dueDate, notes) {
+        const newWork = {
+            id: Date.now().toString() + Math.random(), // Ensure uniqueness for bulk adds
+            classId: classId,
+            studentName: studentName,
+            assignmentName: assignmentName,
+            dueDate: dueDate,
+            dateAdded: new Date().toISOString().split('T')[0],
+            notes: notes,
+            resolved: false
+        };
+        this.missingWork.push(newWork);
+        this.saveData();
+        return newWork;
+    }
+
+    toggleResolved(id) {
+        const work = this.missingWork.find(w => w.id === id);
+        if (work) {
+            work.resolved = !work.resolved;
+            this.saveData();
+            return true;
+        }
+        return false;
+    }
+
+    deleteMissingWork(id) {
+        this.missingWork = this.missingWork.filter(w => w.id !== id);
+        this.saveData();
+    }
+
+    getMissingWorkForClass(classId, filterStudent = 'all', sortBy = 'dateAdded') {
+        let work = this.missingWork.filter(w => w.classId === classId);
+
+        if (filterStudent !== 'all') {
+            work = work.filter(w => w.studentName === filterStudent);
+        }
+
+        work.sort((a, b) => {
+            switch (sortBy) {
+                case 'firstName':
+                    const aFirst = a.studentName.split(' ')[0];
+                    const bFirst = b.studentName.split(' ')[0];
+                    return aFirst.localeCompare(bFirst);
+                case 'lastName':
+                    const aLast = a.studentName.split(' ').slice(-1)[0];
+                    const bLast = b.studentName.split(' ').slice(-1)[0];
+                    return aLast.localeCompare(bLast);
+                case 'dueDate':
+                    if (!a.dueDate) return 1;
+                    if (!b.dueDate) return -1;
+                    return new Date(a.dueDate) - new Date(b.dueDate);
+                case 'dateAdded':
+                default:
+                    return new Date(b.dateAdded) - new Date(a.dateAdded);
+            }
+        });
+
+        return work;
+    }
+
+    // Assignment View Methods
+    getUniqueAssignments() {
+        const assignments = [...new Set(this.missingWork.map(w => w.assignmentName))];
+
+        // Filter out assignments where ALL students have resolved them
+        return assignments.filter(assignmentName => {
+            const workForAssignment = this.missingWork.filter(w => w.assignmentName === assignmentName);
+            return workForAssignment.some(w => !w.resolved);
+        }).sort();
+    }
+
+    getMissingWorkForAssignment(assignmentName) {
+        return this.missingWork.filter(w =>
+            w.assignmentName === assignmentName && !w.resolved
+        );
+    }
+
+    // Initialize App
+    init() {
+        this.setupEventListeners();
+        this.updateTogglePosition();
+        this.render();
+    }
+
+    updateTogglePosition() {
+        // Update toggle switch position
+        const toggleInput = document.getElementById('viewToggle');
+        toggleInput.checked = (this.currentView === 'period');
+    }
+
+    setupEventListeners() {
+        // Settings button
+        document.getElementById('settingsBtn').addEventListener('click', () => {
+            this.showSettings();
+        });
+
+        // Add first class button
+        document.getElementById('addFirstClassBtn').addEventListener('click', () => {
+            this.showAddClassModal();
+        });
+
+        // Add class button in settings
+        document.getElementById('addClassBtn').addEventListener('click', () => {
+            this.showAddClassModal();
+        });
+
+        // Class management dropdown
+        document.getElementById('classManageSelect').addEventListener('change', (e) => {
+            const selectedClassId = e.target.value;
+            const editBtn = document.getElementById('editClassBtn');
+            const deleteBtn = document.getElementById('deleteClassBtn');
+
+            if (selectedClassId) {
+                editBtn.disabled = false;
+                deleteBtn.disabled = false;
+            } else {
+                editBtn.disabled = true;
+                deleteBtn.disabled = true;
+            }
+        });
+
+        // Edit selected class button
+        document.getElementById('editClassBtn').addEventListener('click', () => {
+            const selectedClassId = document.getElementById('classManageSelect').value;
+            if (selectedClassId) {
+                this.editClass(selectedClassId);
+            }
+        });
+
+        // Delete selected class button
+        document.getElementById('deleteClassBtn').addEventListener('click', () => {
+            const selectedClassId = document.getElementById('classManageSelect').value;
+            if (selectedClassId) {
+                this.confirmDeleteClass(selectedClassId);
+            }
+        });
+
+        // Dark mode toggle
+        document.getElementById('darkModeToggle').addEventListener('change', (e) => {
+            this.toggleDarkMode();
+        });
+
+        // Google Drive sign-in/out buttons
+        document.getElementById('googleSignInBtn').addEventListener('click', async () => {
+            if (driveSync) {
+                await driveSync.signIn();
+            }
+        });
+
+        document.getElementById('googleSignOutBtn').addEventListener('click', async () => {
+            if (driveSync && confirm('Are you sure you want to sign out? Your data will only be saved locally.')) {
+                await driveSync.signOut();
+            }
+        });
+
+        // Import roster button
+        document.getElementById('importRosterBtn').addEventListener('click', () => {
+            document.getElementById('rosterFileInput').click();
+        });
+
+        document.getElementById('rosterFileInput').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                this.importRosterFromCSV(file);
+            }
+        });
+
+        // Confirm import button
+        document.getElementById('confirmImportBtn').addEventListener('click', () => {
+            this.confirmImport();
+        });
+
+        // View toggle
+        document.getElementById('viewToggle').addEventListener('change', (e) => {
+            this.currentView = e.target.checked ? 'period' : 'assignment';
+            this.saveData();
+            this.render();
+        });
+
+        // Add assignment button (bulk entry)
+        document.getElementById('addAssignmentBtn').addEventListener('click', () => {
+            this.showAddAssignmentModal();
+        });
+
+        // Edit assignment button
+        document.getElementById('editAssignmentBtn').addEventListener('click', () => {
+            this.showAddAssignmentModal(this.currentAssignmentName);
+        });
+
+        // Add missing work button (individual entry)
+        document.getElementById('addMissingWorkBtn').addEventListener('click', () => {
+            this.showAddMissingWorkModal();
+        });
+
+        // Class form submission
+        document.getElementById('classForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.handleClassFormSubmit();
+        });
+
+        // Assignment form submission (bulk entry)
+        document.getElementById('assignmentForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.handleAssignmentFormSubmit();
+        });
+
+        // Missing work form submission (individual entry)
+        document.getElementById('missingWorkForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.handleMissingWorkFormSubmit();
+        });
+
+        // Filter and sort (period view)
+        document.getElementById('filterStudent').addEventListener('change', () => {
+            this.renderMissingWork();
+        });
+
+        document.getElementById('sortBy').addEventListener('change', () => {
+            this.renderMissingWork();
+        });
+
+        // Period selector dropdown
+        document.getElementById('periodSelect').addEventListener('change', (e) => {
+            this.currentClassId = e.target.value;
+            this.render();
+        });
+
+        // Assignment selector dropdown
+        document.getElementById('assignmentSelect').addEventListener('change', (e) => {
+            this.currentAssignmentName = e.target.value;
+            this.renderAssignmentView();
+        });
+    }
+
+    // Main Rendering
+    render() {
+        this.renderTabs();
+        this.renderMainContent();
+    }
+
+    renderTabs() {
+        const tabNav = document.getElementById('tabNav');
+        // Hide tabs completely - using dropdowns for both views now
+        tabNav.classList.add('hidden');
+    }
+
+
+    renderMainContent() {
+        const welcomeScreen = document.getElementById('welcomeScreen');
+        const assignmentView = document.getElementById('assignmentView');
+        const periodView = document.getElementById('periodView');
+        const addAssignmentBtn = document.getElementById('addAssignmentBtn');
+        const addMissingWorkBtn = document.getElementById('addMissingWorkBtn');
+
+        if (this.classes.length === 0) {
+            welcomeScreen.classList.remove('hidden');
+            assignmentView.classList.add('hidden');
+            periodView.classList.add('hidden');
+            addAssignmentBtn.classList.add('hidden');
+            addMissingWorkBtn.classList.add('hidden');
+        } else {
+            welcomeScreen.classList.add('hidden');
+
+            if (this.currentView === 'assignment') {
+                assignmentView.classList.remove('hidden');
+                periodView.classList.add('hidden');
+                addAssignmentBtn.classList.remove('hidden');
+                addMissingWorkBtn.classList.add('hidden');
+                this.renderAssignmentView();
+            } else {
+                assignmentView.classList.add('hidden');
+                periodView.classList.remove('hidden');
+                addAssignmentBtn.classList.add('hidden');
+                addMissingWorkBtn.classList.remove('hidden');
+                this.renderPeriodView();
+            }
+        }
+    }
+
+    // Assignment View Rendering
+    renderAssignmentView() {
+        const assignmentSelect = document.getElementById('assignmentSelect');
+        const content = document.getElementById('assignmentContent');
+        const emptyState = document.getElementById('assignmentEmptyState');
+
+        const assignments = this.getUniqueAssignments();
+
+        // Populate assignment dropdown
+        assignmentSelect.innerHTML = '<option value="">Select an assignment...</option>' +
+            assignments.map(assignment =>
+                `<option value="${assignment}" ${assignment === this.currentAssignmentName ? 'selected' : ''}>${assignment}</option>`
+            ).join('');
+
+        // Set current assignment if not set
+        if (!this.currentAssignmentName && assignments.length > 0) {
+            this.currentAssignmentName = assignments[0];
+            assignmentSelect.value = this.currentAssignmentName;
+        }
+
+        if (!this.currentAssignmentName || assignments.length === 0) {
+            content.innerHTML = '';
+            emptyState.classList.remove('hidden');
+            return;
+        }
+
+        const work = this.getMissingWorkForAssignment(this.currentAssignmentName);
+
+        if (work.length === 0) {
+            content.innerHTML = '';
+            emptyState.classList.remove('hidden');
+            return;
+        }
+
+        emptyState.classList.add('hidden');
+
+        // Group by class
+        const workByClass = {};
+        work.forEach(item => {
+            if (!workByClass[item.classId]) {
+                workByClass[item.classId] = [];
+            }
+            workByClass[item.classId].push(item);
+        });
+
+        // Render sections for each class
+        content.innerHTML = Object.keys(workByClass).map((classId, index) => {
+            const cls = this.getClass(classId);
+            if (!cls) return '';
+
+            const students = workByClass[classId].sort((a, b) =>
+                a.studentName.localeCompare(b.studentName)
+            );
+
+            return `
+                <div class="period-section" data-period="${index}">
+                    <h3 class="period-section-header">${cls.name}</h3>
+                    <div class="period-students">
+                        ${students.map(student => this.renderStudentItem(student)).join('')}
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        // Add event listeners
+        content.querySelectorAll('[data-action]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const action = btn.dataset.action;
+                const id = btn.dataset.id;
+
+                if (action === 'toggle') {
+                    this.toggleResolved(id);
+                    this.render();
+                } else if (action === 'delete') {
+                    if (confirm('Remove this student from the assignment?')) {
+                        this.deleteMissingWork(id);
+                        this.render();
+                    }
+                }
+            });
+        });
+    }
+
+    renderStudentItem(item) {
+        return `
+            <div class="student-item ${item.resolved ? 'completed' : ''}">
+                <div class="student-name">${item.studentName}</div>
+                <div class="student-actions">
+                    <button class="btn btn-success btn-small"
+                            data-action="toggle"
+                            data-id="${item.id}">
+                        ✓
+                    </button>
+                    <button class="btn btn-danger btn-small"
+                            data-action="delete"
+                            data-id="${item.id}">
+                        🗑️
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+
+    // Period View Rendering
+    renderPeriodView() {
+        // Populate period dropdown
+        const periodSelect = document.getElementById('periodSelect');
+        periodSelect.innerHTML = '<option value="">Select a period...</option>' +
+            this.getSortedClasses().map(cls =>
+                `<option value="${cls.id}" ${cls.id === this.currentClassId ? 'selected' : ''}>${cls.name}</option>`
+            ).join('');
+
+        // Set current class if not set
+        if (!this.currentClassId && this.classes.length > 0) {
+            this.currentClassId = this.classes[0].id;
+            periodSelect.value = this.currentClassId;
+        }
+
+        const currentClass = this.getClass(this.currentClassId);
+        if (currentClass) {
+            this.renderStudentFilter();
+            this.renderMissingWork();
+        }
+    }
+
+    renderStudentFilter() {
+        const filterSelect = document.getElementById('filterStudent');
+        const currentClass = this.getClass(this.currentClassId);
+
+        if (!currentClass) return;
+
+        const students = [...new Set(this.missingWork
+            .filter(w => w.classId === this.currentClassId)
+            .map(w => w.studentName))].sort();
+
+        filterSelect.innerHTML = '<option value="all">All Students</option>' +
+            students.map(student => `<option value="${student}">${student}</option>`).join('');
+    }
+
+    renderMissingWork() {
+        const list = document.getElementById('missingWorkList');
+        const emptyState = document.getElementById('emptyState');
+        const filterStudent = document.getElementById('filterStudent').value;
+        const sortBy = document.getElementById('sortBy').value;
+
+        const work = this.getMissingWorkForClass(this.currentClassId, filterStudent, sortBy);
+
+        if (work.length === 0) {
+            list.innerHTML = '';
+            emptyState.classList.remove('hidden');
+        } else {
+            emptyState.classList.add('hidden');
+
+            // Group by student while preserving sort order
+            const workByStudent = {};
+            const studentOrder = [];
+
+            work.forEach(item => {
+                if (!workByStudent[item.studentName]) {
+                    workByStudent[item.studentName] = [];
+                    studentOrder.push(item.studentName);
+                }
+                workByStudent[item.studentName].push(item);
+            });
+
+            // Render grouped by student in the order they appear in the sorted work array
+            list.innerHTML = studentOrder
+                .map(studentName => this.renderStudentGroupedWork(studentName, workByStudent[studentName]))
+                .join('');
+
+            // Add event listeners
+            list.querySelectorAll('[data-action]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const action = btn.dataset.action;
+                    const id = btn.dataset.id;
+
+                    if (action === 'toggle') {
+                        this.toggleResolved(id);
+                        this.renderMissingWork();
+                    } else if (action === 'delete') {
+                        if (confirm('Are you sure you want to delete this item?')) {
+                            this.deleteMissingWork(id);
+                            this.renderMissingWork();
+                            this.renderStudentFilter();
+                        }
+                    }
+                });
+            });
+        }
+    }
+
+    renderStudentGroupedWork(studentName, assignments) {
+        const hasResolved = assignments.some(a => a.resolved);
+        const hasUnresolved = assignments.some(a => !a.resolved);
+
+        return `
+            <div class="missing-work-item ${!hasUnresolved && hasResolved ? 'resolved' : ''}">
+                <div class="item-header">
+                    <div class="item-student">${studentName}</div>
+                </div>
+                <div class="assignments-list">
+                    ${assignments.map(item => this.renderAssignmentEntry(item)).join('')}
+                </div>
+            </div>
+        `;
+    }
+
+    renderAssignmentEntry(item) {
+        const dueDateText = item.dueDate ?
+            `<span class="item-detail">📅 Due: ${this.formatDate(item.dueDate)}</span>` : '';
+
+        const notesHtml = item.notes ?
+            `<div class="assignment-notes">📝 ${item.notes}</div>` : '';
+
+        return `
+            <div class="assignment-entry ${item.resolved ? 'resolved' : ''}">
+                <div class="assignment-info">
+                    <div class="item-assignment">${item.assignmentName}</div>
+                    <div class="item-details">
+                        ${dueDateText}
+                        <span class="item-detail">📍 Added: ${this.formatDate(item.dateAdded)}</span>
+                    </div>
+                    ${notesHtml}
+                </div>
+                <div class="assignment-actions">
+                    <button class="btn btn-success btn-small"
+                            data-action="toggle"
+                            data-id="${item.id}">
+                        ${item.resolved ? '↩️' : '✓'}
+                    </button>
+                    <button class="btn btn-danger btn-small"
+                            data-action="delete"
+                            data-id="${item.id}">
+                        🗑️
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+
+    renderMissingWorkItem(item) {
+        const dueDateText = item.dueDate ?
+            `<span class="item-detail">📅 Due: ${this.formatDate(item.dueDate)}</span>` : '';
+
+        const notesHtml = item.notes ?
+            `<div class="item-notes">📝 ${item.notes}</div>` : '';
+
+        return `
+            <div class="missing-work-item ${item.resolved ? 'resolved' : ''}">
+                <div class="item-header">
+                    <div class="item-student">${item.studentName}</div>
+                    <div class="item-actions">
+                        <button class="btn btn-success btn-small"
+                                data-action="toggle"
+                                data-id="${item.id}">
+                            ${item.resolved ? '↩️ Reopen' : '✓ Mark Done'}
+                        </button>
+                        <button class="btn btn-danger btn-small"
+                                data-action="delete"
+                                data-id="${item.id}">
+                            🗑️
+                        </button>
+                    </div>
+                </div>
+                <div class="item-assignment">${item.assignmentName}</div>
+                <div class="item-details">
+                    ${dueDateText}
+                    <span class="item-detail">📍 Added: ${this.formatDate(item.dateAdded)}</span>
+                </div>
+                ${notesHtml}
+            </div>
+        `;
+    }
+
+    // Settings Modal
+    showSettings() {
+        const modal = document.getElementById('settingsModal');
+        const classSelect = document.getElementById('classManageSelect');
+
+        // Populate class dropdown
+        classSelect.innerHTML = '<option value="">Select a class...</option>' +
+            this.getSortedClasses().map(cls =>
+                `<option value="${cls.id}">${cls.name} (${cls.students.length} students)</option>`
+            ).join('');
+
+        // Reset buttons to disabled state
+        document.getElementById('editClassBtn').disabled = true;
+        document.getElementById('deleteClassBtn').disabled = true;
+
+        // Set dark mode toggle state
+        document.getElementById('darkModeToggle').checked = this.darkMode;
+
+        modal.classList.remove('hidden');
+    }
+
+    showAddClassModal() {
+        this.editingClassId = null;
+        document.getElementById('classModalTitle').textContent = 'Add New Class';
+        document.getElementById('className').value = '';
+        document.getElementById('studentNames').value = '';
+        document.getElementById('classModal').classList.remove('hidden');
+    }
+
+    editClass(id) {
+        const cls = this.getClass(id);
+        if (cls) {
+            this.editingClassId = id;
+            document.getElementById('classModalTitle').textContent = 'Edit Class';
+            document.getElementById('className').value = cls.name;
+            document.getElementById('studentNames').value = cls.students.join('\n');
+            document.getElementById('classModal').classList.remove('hidden');
+        }
+    }
+
+    confirmDeleteClass(id) {
+        const cls = this.getClass(id);
+        if (cls && confirm(`Are you sure you want to delete "${cls.name}"? This will also delete all missing work for this class.`)) {
+            this.deleteClass(id);
+
+            if (this.currentClassId === id) {
+                this.currentClassId = this.classes.length > 0 ? this.classes[0].id : null;
+            }
+
+            // Refresh the settings modal to update the dropdown
+            this.showSettings();
+            this.render();
+        }
+    }
+
+    handleClassFormSubmit() {
+        const name = document.getElementById('className').value.trim();
+        const studentsText = document.getElementById('studentNames').value;
+        const students = studentsText.split('\n').map(s => s.trim()).filter(s => s !== '');
+
+        if (!name) {
+            alert('Please enter a class name');
+            return;
+        }
+
+        if (this.editingClassId) {
+            this.updateClass(this.editingClassId, name, students);
+        } else {
+            const newClass = this.addClass(name, students);
+            this.currentClassId = newClass.id;
+        }
+
+        closeModal('classModal');
+        closeModal('settingsModal');
+        this.render();
+    }
+
+    // Assignment Modal (Bulk Entry)
+    showAddAssignmentModal(editingAssignmentName = null) {
+        if (this.classes.length === 0) {
+            alert('Please add at least one class first');
+            return;
+        }
+
+        // Reset form
+        document.getElementById('assignmentForm').reset();
+
+        // Set today's date as default
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('newDueDate').value = today;
+
+        // Get existing assignment data if editing
+        let existingWork = [];
+        if (editingAssignmentName) {
+            existingWork = this.missingWork.filter(w => w.assignmentName === editingAssignmentName);
+
+            // Pre-fill form with existing data
+            if (existingWork.length > 0) {
+                const firstItem = existingWork[0];
+                document.getElementById('newAssignmentName').value = editingAssignmentName;
+                document.getElementById('newDueDate').value = firstItem.dueDate || '';
+                document.getElementById('newNotes').value = firstItem.notes || '';
+            }
+
+            // Update modal title and button
+            document.querySelector('#assignmentModal .modal-header h2').textContent = 'Edit Assignment';
+            document.querySelector('#assignmentForm button[type="submit"]').textContent = 'Add More Students';
+        } else {
+            // New assignment mode
+            document.querySelector('#assignmentModal .modal-header h2').textContent = 'New Assignment';
+            document.querySelector('#assignmentForm button[type="submit"]').textContent = 'Create Assignment';
+        }
+
+        // Generate class checkboxes in dropdown
+        const classCheckboxList = document.getElementById('classCheckboxList');
+        classCheckboxList.innerHTML = this.getSortedClasses().map(cls => `
+            <div class="dropdown-checkbox-item">
+                <input type="checkbox"
+                       id="class-${cls.id}"
+                       class="class-dropdown-checkbox"
+                       data-class-id="${cls.id}"
+                       data-class-name="${cls.name}">
+                <label for="class-${cls.id}">${cls.name}</label>
+            </div>
+        `).join('');
+
+        // Setup dropdown toggle
+        const dropdownBtn = document.getElementById('classDropdownBtn');
+        const dropdownPanel = document.getElementById('classDropdownPanel');
+        const dropdown = document.getElementById('classDropdown');
+
+        dropdownBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            dropdown.classList.toggle('open');
+            dropdownPanel.classList.toggle('hidden');
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!dropdown.contains(e.target)) {
+                dropdown.classList.remove('open');
+                dropdownPanel.classList.add('hidden');
+            }
+        });
+
+        // Add event listeners to checkboxes
+        document.querySelectorAll('.class-dropdown-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', () => {
+                this.updateClassDropdownText();
+                this.updateStudentCheckboxes(editingAssignmentName, existingWork);
+            });
+        });
+
+        // Generate initial student checkboxes
+        this.updateStudentCheckboxes(editingAssignmentName, existingWork);
+
+        document.getElementById('assignmentModal').classList.remove('hidden');
+    }
+
+    updateClassDropdownText() {
+        const selectedCheckboxes = Array.from(document.querySelectorAll('.class-dropdown-checkbox:checked'));
+        const dropdownText = document.getElementById('classDropdownText');
+
+        if (selectedCheckboxes.length === 0) {
+            dropdownText.textContent = 'Select classes...';
+            dropdownText.style.color = 'var(--text-secondary)';
+        } else if (selectedCheckboxes.length === 1) {
+            dropdownText.textContent = selectedCheckboxes[0].dataset.className;
+            dropdownText.style.color = 'var(--text-primary)';
+        } else {
+            dropdownText.textContent = `${selectedCheckboxes.length} classes selected`;
+            dropdownText.style.color = 'var(--text-primary)';
+        }
+    }
+
+    updateStudentCheckboxes(editingAssignmentName = null, existingWork = []) {
+        // Get selected class IDs from dropdown checkboxes
+        const selectedClassIds = Array.from(document.querySelectorAll('.class-dropdown-checkbox:checked'))
+            .map(cb => cb.dataset.classId);
+
+        // Filter classes to only show selected ones
+        const selectedClasses = this.classes.filter(cls => selectedClassIds.includes(cls.id));
+
+        // Generate checkboxes for students in selected classes only
+        const checkboxContainer = document.getElementById('studentCheckboxes');
+
+        if (selectedClasses.length === 0) {
+            checkboxContainer.innerHTML = '<p style="color: var(--text-secondary); padding: 20px; text-align: center;">Select at least one class above</p>';
+            return;
+        }
+
+        checkboxContainer.innerHTML = selectedClasses.map(cls => `
+            <div class="checkbox-period-group">
+                <div class="checkbox-period-label">${cls.name}</div>
+                ${cls.students.map(student => {
+                    // Check if this student is already marked as missing this assignment
+                    const isChecked = editingAssignmentName &&
+                        existingWork.some(w => w.classId === cls.id && w.studentName === student && !w.resolved);
+
+                    return `
+                        <div class="checkbox-item">
+                            <input type="checkbox"
+                                   id="student-${cls.id}-${student}"
+                                   name="student"
+                                   data-class-id="${cls.id}"
+                                   data-student-name="${student}"
+                                   ${isChecked ? 'checked' : ''}>
+                            <label for="student-${cls.id}-${student}">${student}</label>
+                        </div>
+                    `;
+                }).join('')}
+            </div>
+        `).join('');
+    }
+
+    handleAssignmentFormSubmit() {
+        const assignmentName = document.getElementById('newAssignmentName').value.trim();
+        const dueDate = document.getElementById('newDueDate').value;
+        const notes = document.getElementById('newNotes').value.trim();
+
+        if (!assignmentName) {
+            alert('Please enter an assignment name');
+            return;
+        }
+
+        // Get all checked students
+        const checkedBoxes = document.querySelectorAll('#studentCheckboxes input[type="checkbox"]:checked');
+
+        if (checkedBoxes.length === 0) {
+            alert('Please select at least one student');
+            return;
+        }
+
+        // Add missing work for each selected student
+        checkedBoxes.forEach(checkbox => {
+            const classId = checkbox.dataset.classId;
+            const studentName = checkbox.dataset.studentName;
+            this.addMissingWork(classId, studentName, assignmentName, dueDate, notes);
+        });
+
+        closeModal('assignmentModal');
+
+        // Switch to assignment view to see the new assignment
+        this.currentView = 'assignment';
+        this.currentAssignmentName = assignmentName;
+        this.saveData();
+
+        // Update toggle switch
+        document.getElementById('viewToggle').checked = false;
+
+        this.render();
+    }
+
+    // Missing Work Modal (Individual Entry)
+    showAddMissingWorkModal() {
+        const currentClass = this.getClass(this.currentClassId);
+        if (!currentClass) return;
+
+        const studentSelect = document.getElementById('studentSelect');
+        studentSelect.innerHTML = '<option value="">Select a student...</option>' +
+            currentClass.students.map(student =>
+                `<option value="${student}">${student}</option>`
+            ).join('');
+
+        document.getElementById('missingWorkForm').reset();
+        document.getElementById('missingWorkModal').classList.remove('hidden');
+    }
+
+    handleMissingWorkFormSubmit() {
+        const studentName = document.getElementById('studentSelect').value;
+        const assignmentName = document.getElementById('assignmentName').value.trim();
+        const dueDate = document.getElementById('dueDate').value;
+        const notes = document.getElementById('notes').value.trim();
+
+        if (!studentName || !assignmentName) {
+            alert('Please select a student and enter an assignment name');
+            return;
+        }
+
+        this.addMissingWork(this.currentClassId, studentName, assignmentName, dueDate, notes);
+
+        closeModal('missingWorkModal');
+        this.renderStudentFilter();
+        this.renderMissingWork();
+    }
+
+    // Utility
+    formatDate(dateString) {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    }
+}
+
+// Google Drive Sync Module
+class GoogleDriveSync {
+    constructor() {
+        this.isSignedIn = false;
+        this.folderId = null;
+        this.dataFileId = null;
+        this.CLIENT_ID = '716302644381-i0ij1vf25gp4i94kmgei91msd97p7bt9.apps.googleusercontent.com';
+        this.API_KEY = 'AIzaSyDGAMvo_dv8jaB7QmpITvGUNkHczOvlpcA';
+        this.SCOPES = 'https://www.googleapis.com/auth/drive.file';
+        this.DATA_FILENAME = 'missing-work-data.json';
+    }
+
+    async init() {
+        // Load Google API client
+        await this.loadGoogleAPI();
+
+        // Check if user was previously signed in
+        const savedFolderId = localStorage.getItem('driveFolderId');
+        const savedFileId = localStorage.getItem('driveDataFileId');
+
+        if (savedFolderId) this.folderId = savedFolderId;
+        if (savedFileId) this.dataFileId = savedFileId;
+
+        // Initialize Google API client
+        await gapi.client.init({
+            apiKey: this.API_KEY,
+            clientId: this.CLIENT_ID,
+            discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'],
+            scope: this.SCOPES
+        });
+
+        // Check sign-in status
+        this.isSignedIn = gapi.auth2.getAuthInstance().isSignedIn.get();
+        this.updateSignInUI();
+
+        // Listen for sign-in state changes
+        gapi.auth2.getAuthInstance().isSignedIn.listen((isSignedIn) => {
+            this.isSignedIn = isSignedIn;
+            this.updateSignInUI();
+            if (isSignedIn) {
+                this.handleSignIn();
+            }
+        });
+    }
+
+    loadGoogleAPI() {
+        return new Promise((resolve) => {
+            if (typeof gapi !== 'undefined') {
+                gapi.load('client:auth2', resolve);
+            } else {
+                // Google API script not loaded yet
+                const script = document.createElement('script');
+                script.src = 'https://apis.google.com/js/api.js';
+                script.onload = () => gapi.load('client:auth2', resolve);
+                document.head.appendChild(script);
+            }
+        });
+    }
+
+    async signIn() {
+        await gapi.auth2.getAuthInstance().signIn();
+    }
+
+    async signOut() {
+        await gapi.auth2.getAuthInstance().signOut();
+        this.folderId = null;
+        this.dataFileId = null;
+        localStorage.removeItem('driveFolderId');
+        localStorage.removeItem('driveDataFileId');
+    }
+
+    async handleSignIn() {
+        // Auto-detect folder containing the HTML file
+        await this.autoDetectFolder();
+
+        // Try to load data from Drive
+        const data = await this.loadFromDrive();
+        if (data) {
+            // Merge with local data or replace
+            app.classes = data.classes || [];
+            app.missingWork = data.missingWork || [];
+            app.render();
+        }
+    }
+
+    async autoDetectFolder() {
+        try {
+            // Search for "Missing Work Tracker.html" in user's Drive
+            const response = await gapi.client.drive.files.list({
+                q: "name='Missing Work Tracker.html' and mimeType='text/html' and trashed=false",
+                fields: 'files(id, name, parents, modifiedTime)',
+                orderBy: 'modifiedTime desc' // Most recent first
+            });
+
+            const files = response.result.files;
+
+            if (files && files.length > 0) {
+                // Use the most recently modified file
+                const htmlFile = files[0];
+
+                if (htmlFile.parents && htmlFile.parents.length > 0) {
+                    this.folderId = htmlFile.parents[0];
+                    localStorage.setItem('driveFolderId', this.folderId);
+                    console.log('Auto-detected folder:', this.folderId);
+
+                    // Look for existing data file in this folder
+                    await this.findDataFile();
+                    return true;
+                }
+            }
+
+            // Fallback: ask user to select folder
+            console.warn('Could not auto-detect folder. Data will be saved to Drive root.');
+            return false;
+        } catch (error) {
+            console.error('Error auto-detecting folder:', error);
+            return false;
+        }
+    }
+
+    async findDataFile() {
+        try {
+            const query = this.folderId
+                ? `name='${this.DATA_FILENAME}' and '${this.folderId}' in parents and trashed=false`
+                : `name='${this.DATA_FILENAME}' and trashed=false`;
+
+            const response = await gapi.client.drive.files.list({
+                q: query,
+                fields: 'files(id, name)',
+                pageSize: 1
+            });
+
+            if (response.result.files && response.result.files.length > 0) {
+                this.dataFileId = response.result.files[0].id;
+                localStorage.setItem('driveDataFileId', this.dataFileId);
+                console.log('Found existing data file:', this.dataFileId);
+            }
+        } catch (error) {
+            console.error('Error finding data file:', error);
+        }
+    }
+
+    async loadFromDrive() {
+        if (!this.isSignedIn) return null;
+
+        try {
+            if (!this.dataFileId) {
+                await this.findDataFile();
+            }
+
+            if (!this.dataFileId) {
+                console.log('No data file found in Drive');
+                return null;
+            }
+
+            const response = await gapi.client.drive.files.get({
+                fileId: this.dataFileId,
+                alt: 'media'
+            });
+
+            return JSON.parse(response.body);
+        } catch (error) {
+            console.error('Error loading from Drive:', error);
+            return null;
+        }
+    }
+
+    async saveToDrive(data) {
+        if (!this.isSignedIn) return false;
+
+        try {
+            const content = JSON.stringify(data, null, 2);
+            const boundary = '-------314159265358979323846';
+            const delimiter = "\r\n--" + boundary + "\r\n";
+            const closeDelim = "\r\n--" + boundary + "--";
+
+            const metadata = {
+                name: this.DATA_FILENAME,
+                mimeType: 'application/json'
+            };
+
+            if (this.folderId) {
+                metadata.parents = [this.folderId];
+            }
+
+            const multipartRequestBody =
+                delimiter +
+                'Content-Type: application/json\r\n\r\n' +
+                JSON.stringify(metadata) +
+                delimiter +
+                'Content-Type: application/json\r\n\r\n' +
+                content +
+                closeDelim;
+
+            let response;
+            if (this.dataFileId) {
+                // Update existing file
+                response = await gapi.client.request({
+                    path: `/upload/drive/v3/files/${this.dataFileId}`,
+                    method: 'PATCH',
+                    params: { uploadType: 'multipart' },
+                    headers: {
+                        'Content-Type': 'multipart/related; boundary="' + boundary + '"'
+                    },
+                    body: multipartRequestBody
+                });
+            } else {
+                // Create new file
+                response = await gapi.client.request({
+                    path: '/upload/drive/v3/files',
+                    method: 'POST',
+                    params: { uploadType: 'multipart' },
+                    headers: {
+                        'Content-Type': 'multipart/related; boundary="' + boundary + '"'
+                    },
+                    body: multipartRequestBody
+                });
+
+                this.dataFileId = response.result.id;
+                localStorage.setItem('driveDataFileId', this.dataFileId);
+            }
+
+            console.log('Saved to Drive successfully');
+            return true;
+        } catch (error) {
+            console.error('Error saving to Drive:', error);
+            return false;
+        }
+    }
+
+    updateSignInUI() {
+        const signInBtn = document.getElementById('googleSignInBtn');
+        const signOutBtn = document.getElementById('googleSignOutBtn');
+        const syncStatus = document.getElementById('syncStatus');
+
+        if (signInBtn && signOutBtn) {
+            if (this.isSignedIn) {
+                signInBtn.classList.add('hidden');
+                signOutBtn.classList.remove('hidden');
+                if (syncStatus) syncStatus.textContent = '☁️ Synced with Google Drive';
+            } else {
+                signInBtn.classList.remove('hidden');
+                signOutBtn.classList.add('hidden');
+                if (syncStatus) syncStatus.textContent = '💾 Saved locally only';
+            }
+        }
+    }
+}
+
+// Modal Management
+function closeModal(modalId) {
+    document.getElementById(modalId).classList.add('hidden');
+}
+
+// Initialize App
+let app;
+let driveSync;
+
+document.addEventListener('DOMContentLoaded', async () => {
+    app = new MissingWorkTracker();
+    driveSync = new GoogleDriveSync();
+
+    // Initialize Drive sync (will be ready when needed)
+    try {
+        await driveSync.init();
+    } catch (error) {
+        console.error('Drive sync initialization failed:', error);
+    }
+});
+
+    </script>
+</body>
+</html>
